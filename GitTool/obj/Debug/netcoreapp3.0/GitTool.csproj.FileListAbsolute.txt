@@ -1,0 +1,8 @@
+D:\Task3\GitApp\GitTool\bin\Debug\netcoreapp3.0\GitTool.deps.json
+D:\Task3\GitApp\GitTool\bin\Debug\netcoreapp3.0\GitTool.dll
+D:\Task3\GitApp\GitTool\obj\Debug\netcoreapp3.0\GitTool.csprojAssemblyReference.cache
+D:\Task3\GitApp\GitTool\obj\Debug\netcoreapp3.0\GitTool.AssemblyInfoInputs.cache
+D:\Task3\GitApp\GitTool\obj\Debug\netcoreapp3.0\GitTool.AssemblyInfo.cs
+D:\Task3\GitApp\GitTool\bin\Debug\netcoreapp3.0\GitTool.pdb
+D:\Task3\GitApp\GitTool\obj\Debug\netcoreapp3.0\GitTool.dll
+D:\Task3\GitApp\GitTool\obj\Debug\netcoreapp3.0\GitTool.pdb
