@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
 
 namespace GitTool
 {
@@ -25,24 +26,36 @@ namespace GitTool
         public async Task<bool> Clone(string url, string path)
         {
             // try move this into separate thread
-            bool result = false;
-            new Thread(() =>
+            bool result;
+            try
             {
-                try
+                var co = new CloneOptions
                 {
-                    var co = new CloneOptions
-                    {
-                        CredentialsProvider = GetCredentials,
-                    };
-                    Repository.Clone(url, path, co);
-                    result = true;
-                }
-                catch
-                {
-                    result = false;
-                }
-            });
+                    CredentialsProvider = GetCredentials,
+                };
+                Repository.Clone(url, path, co);
+                result = await Task.FromResult<bool>(true);
+            }
+            catch
+            {
+                result = await Task.FromResult<bool>(false);
+            }
+
             return result;
+        }
+
+        public void Pull(Repository repo)
+        {
+                // Credential information to fetch
+                PullOptions options = new PullOptions();
+                options.FetchOptions = new FetchOptions();
+                options.FetchOptions.CredentialsProvider = new CredentialsHandler(GetCredentials);
+
+                var signature = new Signature(
+                    new Identity(login, login), DateTimeOffset.Now);
+
+                // Pull
+                Commands.Pull(repo, signature, options);
         }
 
         // url, usernameFromUrl, types
@@ -62,6 +75,7 @@ namespace GitTool
             try
             {
                 using var repo = new Repository(path);
+                Pull(repo);
                 foreach (var commit in repo.Commits)
                 {
                     foreach (var parent in commit.Parents)
@@ -74,8 +88,6 @@ namespace GitTool
                         files.AddRange(commit.Tree.Select(file => file.Path));
                     }
                 }
-
-                DeleteReadOnlyDirectory(path);
             }
             catch (Exception e)
             {
@@ -96,22 +108,22 @@ namespace GitTool
         }
 
 
-        [Obsolete("currently avoid it usage. In fact it doesn't work. And we are going to cache our cloned repositories")]
-        private static void DeleteReadOnlyDirectory(string directory)
-        {
-            foreach (var subdirectory in Directory.EnumerateDirectories(directory))
-            {
-                DeleteReadOnlyDirectory(subdirectory);
-            }
+        // [Obsolete("currently avoid it usage. In fact it doesn't work. And we are going to cache our cloned repositories")]
+        // private static void DeleteReadOnlyDirectory(string directory)
+        // {
+        //    foreach (var subdirectory in Directory.EnumerateDirectories(directory))
+        //    {
+        //        DeleteReadOnlyDirectory(subdirectory);
+        //    }
 
-            foreach (var fileName in Directory.EnumerateFiles(directory))
-            {
-                var fileInfo = new FileInfo(fileName);
-                fileInfo.Attributes = FileAttributes.Normal;
-                fileInfo.Delete();
-            }
+        // foreach (var fileName in Directory.EnumerateFiles(directory))
+        //    {
+        //        var fileInfo = new FileInfo(fileName);
+        //        fileInfo.Attributes = FileAttributes.Normal;
+        //        fileInfo.Delete();
+        //    }
 
-            Directory.Delete(directory);
-        }
+        // Directory.Delete(directory);
+        // }
     }
 }

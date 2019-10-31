@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace GitApp.Models.ViewModels
 {
-    public class RepositoryViewModel
+    public class VcsRepositoryViewModel
     {
         public int Id { get; set; }
 
