@@ -107,7 +107,6 @@ namespace GitTool
             return null;
         }
 
-
         // [Obsolete("currently avoid it usage. In fact it doesn't work. And we are going to cache our cloned repositories")]
         // private static void DeleteReadOnlyDirectory(string directory)
         // {

@@ -58,13 +58,18 @@ namespace GitApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        // Todo: update all hardcoded action names with nameof()
-        public async Task<IActionResult> Upload(string repositoryUrl)
+        public async Task<IActionResult> Upload()
         {
-            if (repositoryUrl != null)
+            return View();
+        }
+
+        // Todo: update all hardcoded action names with nameof()
+        [HttpPost]
+        public async Task<IActionResult> Upload(UploadVcsRepositoryViewModel model)
+        {
+            if (model.repositoryUrl != null)
             {
-                var temp = db.Repositories.FirstOrDefault(r => r.Url == repositoryUrl);
+                var temp = db.Repositories.FirstOrDefault(r => r.Url == model.repositoryUrl);
                 if (temp != null)
                 {
                     return RedirectToAction(nameof(Update), new { id = temp.Id });
@@ -72,26 +77,22 @@ namespace GitApp.Controllers
 
                 // get rid of filename. It is ok to make FileName -> full repository url
                 // Enhancement: remove base host name, remove git extension. So file name will be like /Folder/Folder2/File.cs
-                var fileName = repositoryUrl.GitFileName();
+                var fileName = model.repositoryUrl.ToGitFileName();
 
                 // Todo: make hardcoded "Repositories" to be a constant
-                var uploads = Path.Combine(hostingEnvironment.WebRootPath, folderName);
-                var repoPath = Path.Combine(uploads, fileName);
+                var repoPath = GetRepositoryPath(fileName);
 
-                var result = await git.Clone(repositoryUrl, repoPath);
+                var result = await git.Clone(model.repositoryUrl, repoPath);
                 if (result)
                 {
                     // todo: try to initialize Files in {}
-                    Repository repo = new Repository { Name = fileName, Url = repositoryUrl, DateTime = DateTime.Now };
+                    Repository repo = new Repository { Name = fileName, Url = model.repositoryUrl, DateTime = DateTime.Now };
 
-                    // Check if `, Repository = repo` is required here.
                     repo.Files = git.GetFiles(repoPath).Select(f => new Models.Db.File { Name = f.Key, ChangesCount = f.Value, Repository = repo }).ToList();
                     await db.Repositories.AddAsync(repo);
 
                     // await db.Files.AddRangeAsync(files);
                     await db.SaveChangesAsync();
-
-                    return RedirectToAction(nameof(Info), fileName);
                 }
             }
 
@@ -103,9 +104,8 @@ namespace GitApp.Controllers
             var repo = await db.Repositories.FirstOrDefaultAsync(r => r.Id == id);
             if (repo != null)
             {
-                var fileName = repo.Url.GitFileName();
-                var uploads = Path.Combine(hostingEnvironment.WebRootPath, folderName);
-                var repoPath = Path.Combine(uploads, fileName);
+                var fileName = repo.Url.ToGitFileName();
+                var repoPath = GetRepositoryPath(fileName);
 
                 var files = git.GetFiles(repoPath).Select(f => new Models.Db.File
                 {
@@ -119,6 +119,14 @@ namespace GitApp.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // Move this somewhere...
+        private string GetRepositoryPath(string fileName)
+        {
+            var uploads = Path.Combine(hostingEnvironment.WebRootPath, folderName);
+            var repoPath = Path.Combine(uploads, fileName);
+            return repoPath.Replace("/", "\\");
         }
     }
 }

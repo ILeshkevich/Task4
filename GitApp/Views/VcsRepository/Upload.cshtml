@@ -1,0 +1,11 @@
+﻿@model GitApp.Models.ViewModels.UploadVcsRepositoryViewModel
+@{
+    ViewData["Title"] = "Upload";
+}
+
+<h1>Upload</h1>
+
+<form asp-action="Upload" asp-controller="VcsRepository" method="post">
+    <input type="text" asp-for="repositoryUrl" class="form-control" />
+    <button type="submit" class="btn btn-dark">Upload</button>
+</form>

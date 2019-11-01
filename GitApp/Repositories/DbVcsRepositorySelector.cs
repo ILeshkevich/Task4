@@ -19,38 +19,14 @@ namespace GitApp.Repositories
 
         public List<VcsRepositoryViewModel> List()
         {
-           return db.Repositories.Include(r => r.Files).Select(r => new VcsRepositoryViewModel
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    LastUpdate = r.DateTime,
-                    Url = r.Url,
-                    Fiels = r.Files.Select(f => new FileViewModel { Name = f.Name, Count = f.ChangesCount }).ToList(),
-                }).ToList();
-        }
-
-        public List<VcsRepositoryViewModel> List(int count)
-        {
             return db.Repositories.Include(r => r.Files).Select(r => new VcsRepositoryViewModel
             {
                 Id = r.Id,
                 Name = r.Name,
                 LastUpdate = r.DateTime,
                 Url = r.Url,
-                Fiels = r.Files.Select(f => new FileViewModel { Name = f.Name, Count = f.ChangesCount }).ToList(),
-            }).Take(count).ToList();
-        }
-
-        public List<VcsRepositoryViewModel> List(int first, int count)
-        {
-            return db.Repositories.Include(r => r.Files).Select(r => new VcsRepositoryViewModel
-            {
-                Id = r.Id,
-                Name = r.Name,
-                LastUpdate = r.DateTime,
-                Url = r.Url,
-                Fiels = r.Files.Select(f => new FileViewModel { Name = f.Name, Count = f.ChangesCount }).ToList(),
-            }).Skip(first).Take(count).ToList();
+                Fiels = r.Files.OrderByDescending(f => f.ChangesCount).Select(f => new FileViewModel { Name = f.Name, Count = f.ChangesCount }).ToList(),
+            }).ToList();
         }
 
         public VcsRepositoryViewModel FirstOrDefault(int id)
@@ -66,6 +42,7 @@ namespace GitApp.Repositories
                     LastUpdate = repo.DateTime,
                     Fiels = repo.Files
                     .Where(f => f.RepositoryId == id)
+                    .OrderByDescending(f => f.ChangesCount)
                     .Select(f => new FileViewModel
                     {
                         Name = f.Name,
@@ -79,9 +56,9 @@ namespace GitApp.Repositories
             }
         }
 
-        public VcsRepositoryViewModel FirstOrDefault(string url)
+        public VcsRepositoryViewModel FirstOrDefault(int id, int count)
         {
-            var repo = db.Repositories.Include(r => r.Files).FirstOrDefault(r => r.Url == url);
+            var repo = db.Repositories.Include(r => r.Files).FirstOrDefault(r => r.Id == id);
             if (repo != null)
             {
                 return new VcsRepositoryViewModel
@@ -91,7 +68,9 @@ namespace GitApp.Repositories
                     Url = repo.Url,
                     LastUpdate = repo.DateTime,
                     Fiels = repo.Files
-                    .Where(f => f.RepositoryId == repo.Id)
+                    .Where(f => f.RepositoryId == id)
+                    .OrderByDescending(f => f.ChangesCount)
+                    .Take(count)
                     .Select(f => new FileViewModel
                     {
                         Name = f.Name,

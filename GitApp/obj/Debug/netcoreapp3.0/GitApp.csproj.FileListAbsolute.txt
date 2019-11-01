@@ -141,4 +141,6 @@ D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\GitApp.Views.pdb
 D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\GitApp.csproj.CopyComplete
 D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\GitApp.dll
 D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\GitApp.pdb
-D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\Razor\Views\Repository\Index.cshtml.g.cs
+D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\Razor\Views\VcsRepository\Info.cshtml.g.cs
+D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\Razor\Views\VcsRepository\Index.cshtml.g.cs
+D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\Razor\Views\VcsRepository\Upload.cshtml.g.cs

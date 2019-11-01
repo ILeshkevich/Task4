@@ -7,7 +7,7 @@ namespace GitApp.Services
 {
     public static class StringExtension
     {
-        public static string GitFileName(this string str)
+        public static string ToGitFileName(this string str)
         {
             return str.Replace(@"https://github.com/", string.Empty).Replace(@".git", string.Empty);
         }

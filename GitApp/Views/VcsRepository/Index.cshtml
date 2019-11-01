@@ -1,0 +1,42 @@
+﻿@model List<GitApp.Models.ViewModels.VcsRepositoryViewModel>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<a class="btn btn-dark mb-3" asp-action="Upload" asp-controller="VcsRepository">Upload</a>
+
+<table class="table table-striped table-sm table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Url</th>
+            <th>Info</th>
+            <th>Most changin files</th>
+            <th>File changes count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{int i = 1;}
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td rowspan="3">@(i++)</td>
+            <td rowspan="3"><a href="@item.Url">@item.Url</a></td>
+            <td rowspan="3"><a class="btn btn-dark" asp-action="Info" asp-route-id="@item.Id">Info</a></td>
+            <td>@item.Fiels[0].Name</td>
+            <td>@item.Fiels[0].Count</td>
+        </tr>
+
+            @for (int a = 1; a < item.Fiels.Count && a < 3; a++)
+            {
+                <tr>
+                    <td>@item.Fiels[a].Name</td>
+                    <td>@item.Fiels[a].Count</td>
+                </tr>
+            }
+        }
+    </tbody>
+
+</table>

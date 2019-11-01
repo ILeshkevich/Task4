@@ -1,9 +1,9 @@
-﻿using GitApp.Models.Db;
-using GitApp.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GitApp.Models.Db;
+using GitApp.Services;
 
 namespace GitApp.Repositories
 {
@@ -16,9 +16,7 @@ namespace GitApp.Repositories
             db = context;
         }
 
-        public async Task UpdateRepositoryAsync(
-            IEnumerable<File> files,
-            Repository repository)
+        public async Task UpdateRepositoryAsync(IEnumerable<File> files, Repository repository)
         {
             repository.DateTime = DateTime.Now;
             db.Update(repository);
