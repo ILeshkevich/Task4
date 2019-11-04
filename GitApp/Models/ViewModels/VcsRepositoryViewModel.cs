@@ -15,7 +15,6 @@ namespace GitApp.Models.ViewModels
 
         public DateTime LastUpdate { get; set; }
 
-        // todo: rename to Files
-        public List<FileViewModel> Fiels { get; set; }
+        public IReadOnlyList<FileViewModel> Files { get; set; }
     }
 }

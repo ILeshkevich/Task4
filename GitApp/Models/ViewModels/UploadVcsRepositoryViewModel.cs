@@ -7,6 +7,6 @@ namespace GitApp.Models.ViewModels
 {
     public class UploadVcsRepositoryViewModel
     {
-        public string repositoryUrl { get; set; }
+        public string RepositoryUrl { get; set; }
     }
 }

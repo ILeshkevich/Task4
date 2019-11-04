@@ -15,7 +15,6 @@ namespace GitApp.Models.Db
 
         public DateTime DateTime { get; set; }
 
-        // Todo: Investigate if virtual is required here
-        public List<File> Files { get; set; }
+        public IReadOnlyList<File> Files { get; set; }
     }
 }

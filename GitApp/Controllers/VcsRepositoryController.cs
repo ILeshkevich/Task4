@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GitApp.Hubs;
 using GitApp.Models.Db;
 using GitApp.Models.ViewModels;
 using GitApp.Repositories;
@@ -10,46 +10,44 @@ using GitApp.Services;
 using GitTool;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+
+// todo: SignalR support async task tracking...
 namespace GitApp.Controllers
 {
-    // Try to avoid fat controllers
-    // Move db-related logic into repositories
-    // Move business-logic into services
-    // Todo: Always remove unused code.
-    // Todo: sync code style, investigate why .editorconfig doesn't work
-    // Todo: get rid of logger or add usage.
     public class VcsRepositoryController : Controller
     {
         private readonly ILogger<VcsRepositoryController> logger;
         private readonly ApplicationContext db;
         private readonly IHostingEnvironment hostingEnvironment;
-        private readonly Git git;
-        private static string folderName = "Repositories";
+        private readonly GitService _gitService;
+        private readonly DbVcsRepositorySelector dbSelector;
+        private const string FolderName = "Repositories";
+        private readonly DbVcsRepositoryWriter dbWriter;
+        private readonly IHubContext<UploadStatusHub> hubContext;
 
-        public VcsRepositoryController(ILogger<VcsRepositoryController> logger, ApplicationContext context, IHostingEnvironment environment, Git git)
+        public VcsRepositoryController(ILogger<VcsRepositoryController> logger, ApplicationContext context, IHostingEnvironment environment, GitService gitService, IHubContext<UploadStatusHub> hubContext)
         {
             this.logger = logger;
             db = context;
             hostingEnvironment = environment;
-            this.git = git;
+            this._gitService = gitService;
+            this.dbSelector = new DbVcsRepositorySelector(context);
+            this.hubContext = hubContext;
         }
 
         public IActionResult Index()
         {
-            // SOLID
-            // Todo: rename Repository... into VcsRepository
-            // todo: try to use Automapper library.
-            // I suggest to move db.files.select... into repository and intoduce new variable
-            // todo: investigate if Include is required here or not.
-            return View(new DbVcsRepositorySelector(db).List());
+            return View(dbSelector.List());
         }
 
         public IActionResult Info(int id)
         {
-            var repo = new DbVcsRepositorySelector(db).FirstOrDefault(id);
+            var repoService = new DbVcsRepositorySelector(db);
+            var repo = repoService.FirstOrDefault(id);
             if (repo != null)
             {
                 return View(repo);
@@ -58,43 +56,43 @@ namespace GitApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Upload()
+        [HttpGet]
+        public IActionResult Upload()
         {
             return View();
         }
 
-        // Todo: update all hardcoded action names with nameof()
         [HttpPost]
         public async Task<IActionResult> Upload(UploadVcsRepositoryViewModel model)
         {
-            if (model.repositoryUrl != null)
+            if (model.RepositoryUrl == null)
             {
-                var temp = db.Repositories.FirstOrDefault(r => r.Url == model.repositoryUrl);
-                if (temp != null)
-                {
-                    return RedirectToAction(nameof(Update), new { id = temp.Id });
-                }
-
-                // get rid of filename. It is ok to make FileName -> full repository url
-                // Enhancement: remove base host name, remove git extension. So file name will be like /Folder/Folder2/File.cs
-                var fileName = model.repositoryUrl.ToGitFileName();
-
-                // Todo: make hardcoded "Repositories" to be a constant
-                var repoPath = GetRepositoryPath(fileName);
-
-                var result = await git.Clone(model.repositoryUrl, repoPath);
-                if (result)
-                {
-                    // todo: try to initialize Files in {}
-                    Repository repo = new Repository { Name = fileName, Url = model.repositoryUrl, DateTime = DateTime.Now };
-
-                    repo.Files = git.GetFiles(repoPath).Select(f => new Models.Db.File { Name = f.Key, ChangesCount = f.Value, Repository = repo }).ToList();
-                    await db.Repositories.AddAsync(repo);
-
-                    // await db.Files.AddRangeAsync(files);
-                    await db.SaveChangesAsync();
-                }
+                return RedirectToAction(nameof(Index));
             }
+
+            var temp = dbSelector.FirstOrDefault(model.RepositoryUrl);
+            if (temp != null)
+            {
+                return RedirectToAction(nameof(Update), new { id = temp.Id });
+            }
+
+            var fileName = model.RepositoryUrl.ToGitFileName();
+
+            var repoPath = GetRepositoryPath(fileName);
+
+            var result = await _gitService.CloneAsync(model.RepositoryUrl, repoPath);
+
+            if (!result)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var repo = new Repository { Name = fileName, Url = model.RepositoryUrl, DateTime = DateTime.Now };
+
+            repo.Files = _gitService.GetFiles(repoPath).Select(f =>
+                new Models.Db.File { Name = f.Key, ChangesCount = f.Value, Repository = repo }).ToList();
+            await db.Repositories.AddAsync(repo);
+            await db.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
@@ -102,29 +100,29 @@ namespace GitApp.Controllers
         public async Task<IActionResult> Update(int id)
         {
             var repo = await db.Repositories.FirstOrDefaultAsync(r => r.Id == id);
-            if (repo != null)
+            if (repo == null)
             {
-                var fileName = repo.Url.ToGitFileName();
-                var repoPath = GetRepositoryPath(fileName);
-
-                var files = git.GetFiles(repoPath).Select(f => new Models.Db.File
-                {
-                    Name = f.Key,
-                    ChangesCount = f.Value,
-                    Repository = repo,
-                });
-
-                await new DbVcsRepositoryWriter(db).UpdateRepositoryAsync(files, repo);
-                return View(nameof(Info), new DbVcsRepositorySelector(db).FirstOrDefault(id));
+                return RedirectToAction(nameof(Index));
             }
 
-            return RedirectToAction(nameof(Index));
+            var fileName = repo.Url.ToGitFileName();
+            var repoPath = GetRepositoryPath(fileName);
+
+            var files = _gitService.GetFiles(repoPath).Select(f => new Models.Db.File
+            {
+                Name = f.Key,
+                ChangesCount = f.Value,
+                Repository = repo,
+            });
+
+            await new DbVcsRepositoryWriter(db).UpdateRepositoryAsync(files, repo);
+
+            return View(nameof(Info), new DbVcsRepositorySelector(db).FirstOrDefault(id));
         }
 
-        // Move this somewhere...
         private string GetRepositoryPath(string fileName)
         {
-            var uploads = Path.Combine(hostingEnvironment.WebRootPath, folderName);
+            var uploads = Path.Combine(hostingEnvironment.WebRootPath, FolderName);
             var repoPath = Path.Combine(uploads, fileName);
             return repoPath.Replace("/", "\\");
         }

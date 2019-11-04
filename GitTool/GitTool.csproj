@@ -10,6 +10,7 @@
   
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.26.1" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="3.1.0-preview2.19528.8" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

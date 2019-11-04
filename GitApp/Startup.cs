@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using GitApp.Hubs;
 using GitApp.Models.Db;
+using GitApp.Repositories;
 using GitTool;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,7 +31,8 @@ namespace GitApp
             var login = Configuration.GetValue<string>("GitHub:Login");
             var password = Configuration.GetValue<string>("GitHub:Password");
 
-            services.AddTransient(o => new Git(login, password));
+            services.AddSignalR();
+            services.AddTransient(o => new GitService(login, password));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +49,12 @@ namespace GitApp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<UploadStatusHub>("/upload");
+            });
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
