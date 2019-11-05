@@ -1,18 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using GitApp.Models.Db;
 using GitApp.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace GitApp.Repositories
 {
-    public class DbVcsRepositorySelector : IDbVcsRepositorySelector
+    public class DbVcsRepository : IDbVcsRepository
     {
         private readonly ApplicationContext db;
 
         private const int AllFilesToShow = -1;
 
-        public DbVcsRepositorySelector(ApplicationContext context)
+        public DbVcsRepository(ApplicationContext context)
         {
             db = context;
         }
@@ -26,7 +29,8 @@ namespace GitApp.Repositories
                 Name = r.Name,
                 LastUpdate = r.DateTime,
                 Url = r.Url,
-                Files = r.Files.OrderByDescending(f => f.ChangesCount).Select(f => new FileViewModel { Name = f.Name, Count = f.ChangesCount }).ToList(),
+                Files = r.Files.OrderByDescending(f => f.ChangesCount)
+                    .Select(f => new FileViewModel { Name = f.Name, Count = f.ChangesCount }).ToList(),
             }).ToList();
             db.Dispose();
             return result;
@@ -34,6 +38,7 @@ namespace GitApp.Repositories
 
         public VcsRepositoryViewModel FirstOrDefault(string url, int count)
         {
+            
             var repo = db.Repositories.Include(r => r.Files).FirstOrDefault(r => r.Url == url);
             if (repo != null)
             {
@@ -64,6 +69,25 @@ namespace GitApp.Repositories
         }
 
         /// <inheritdoc/>
+        public Repository GetRepository(int id)
+        {
+            return db.Repositories.FirstOrDefault(r => r.Id == id);
+        }
+
+        /// <inheritdoc/>
+        public Repository GetRepository(string repoUrl)
+        {
+            return db.Repositories.FirstOrDefault(r => r.Url == repoUrl);
+        }
+        
+        /// <inheritdoc/>
+        public Task<int> AddAndSaveChangesAsync(Repository repository)
+        {
+            db.Repositories.AddAsync(repository);
+            return db.SaveChangesAsync();
+        }
+
+        /// <inheritdoc/>
         public VcsRepositoryViewModel FirstOrDefault(int id, int count)
         {
             var repo = db.Repositories.Include(r => r.Files).FirstOrDefault(r => r.Id == id);
@@ -87,12 +111,12 @@ namespace GitApp.Repositories
         private IReadOnlyList<FileViewModel> GetFiles(Repository repo, int count)
         {
             var files = repo.Files
-                    .OrderByDescending(f => f.ChangesCount)
-                    .Select(f => new FileViewModel
-                    {
-                        Name = f.Name,
-                        Count = f.ChangesCount,
-                    });
+                .OrderByDescending(f => f.ChangesCount)
+                .Select(f => new FileViewModel
+                {
+                    Name = f.Name,
+                    Count = f.ChangesCount,
+                });
 
             if (count != AllFilesToShow)
             {
@@ -100,6 +124,18 @@ namespace GitApp.Repositories
             }
 
             return files.ToList();
+        }
+
+        /// <inheritdoc/>
+        public async Task UpdateRepositoryAsync(Repository repository, IEnumerable<File> files)
+        {
+            repository.DateTime = DateTime.Now;
+            repository.Files.Clear();
+            //db.RemoveRange(db.Files.Where(f => f.RepositoryId == repository.Id).ToList());
+            //db.Files.AddRange(files);
+            repository.Files.AddRange(files);
+            db.Update(repository);
+            await db.SaveChangesAsync();
         }
     }
 }

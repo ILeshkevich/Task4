@@ -10,9 +10,8 @@ namespace GitTool
         /// Asynchronous cloning git Repository.
         /// </summary>
         /// <param name="url">Url to Git repository. <example>https://github.com/ILeshkevich/Task4.git</example></param>
-        /// <param name="path">Local path where repository will be locate.</param>
         /// <returns>True if repository created, false if exception.</returns>
-        Task<bool> CloneAsync(string url, string path);
+        Task<bool> CloneAsync(string url);
 
         /// <summary>
         /// Pulling Git repository.

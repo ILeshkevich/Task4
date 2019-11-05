@@ -1,5 +1,3 @@
-using System;
-
 namespace GitApp.Models
 {
     public class ErrorViewModel

@@ -1,37 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace GitTool
 {
     public class GitService : IGitService
     {
+        private const string FolderName = "Repositories";
         private readonly string login;
         private readonly string password;
+        private readonly IHostingEnvironment hostingEnvironment;
+        private readonly IConfiguration Configuration;
 
-        public GitService(string login, string password)
+        public GitService(IHostingEnvironment environment, IConfiguration configuration)
         {
             this.login = login;
             this.password = password;
+            this.hostingEnvironment = environment;
+            login = configuration.("GitHub:Login");
+            password = configuration.GetValue<string>("GitHub:Password");
         }
 
         /// <inheritdoc/>
-        public async Task<bool> CloneAsync(string url, string path)
+        public async Task<bool> CloneAsync(string url)
         {
+            var path = GetRepositoryPath(url);
             try
             {
-                await Task.Run(() => DoWork(url, path));
+                await Task.Run(() => CloneDoWork(url, path));
                 return true;
             }
             catch
             {
-                // ignored
+                return false;
             }
-
-            return false;
         }
 
         /// <inheritdoc/>
@@ -102,13 +110,20 @@ namespace GitTool
             };
         }
 
-        private void DoWork(string url, string path)
+        private void CloneDoWork(string url, string path)
         {
             var co = new CloneOptions
             {
                 CredentialsProvider = GetCredentials,
             };
             Repository.Clone(url, path, co);
+        }
+        
+        private string GetRepositoryPath(string fileName)
+        {
+            var uploads = Path.Combine(hostingEnvironment.WebRootPath, FolderName);
+            var repoPath = Path.Combine(uploads, fileName);
+            return repoPath.Replace("/", "\\");
         }
     }
 }

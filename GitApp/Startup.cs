@@ -30,9 +30,18 @@ namespace GitApp
 
             var login = Configuration.GetValue<string>("GitHub:Login");
             var password = Configuration.GetValue<string>("GitHub:Password");
-
+            
+            services.AddCors(options => options.AddPolicy("CorsPolicy",
+                builder =>
+                {
+                    builder.AllowAnyMethod().AllowAnyHeader()
+                        .WithOrigins("http://localhost:55830")
+                        .AllowCredentials();
+                }));
             services.AddSignalR();
-            services.AddTransient(o => new GitService(login, password));
+            services.AddTransient<GitService, GitService>();
+            services.AddTransient<IDbVcsRepository, DbVcsRepository>();
+            services.AddTransient<IVcsFiles, VcsFiles>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,11 +59,8 @@ namespace GitApp
                 app.UseHsts();
             }
 
-
-            app.UseSignalR(routes =>
-            {
-                routes.MapHub<UploadStatusHub>("/upload");
-            });
+            app.UseCors("CorsPolicy");
+            app.UseSignalR(routes => { routes.MapHub<UploadStatusHub>("/UploadStatus"); });
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GitApp.Models.Db
 {
@@ -15,6 +13,6 @@ namespace GitApp.Models.Db
 
         public DateTime DateTime { get; set; }
 
-        public IReadOnlyList<File> Files { get; set; }
+        public List<File> Files { get; set; }
     }
 }

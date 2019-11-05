@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace GitApp.Models.Db
+﻿namespace GitApp.Models.Db
 {
     public class File
     {
