@@ -1,55 +1,69 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GitApp.Models.Db;
 using GitApp.Repositories;
-using GitApp.Services;
+
 using GitTool;
-using Microsoft.AspNetCore.Hosting;
+using GitTool.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace GitApp.Hubs
 {
     public class UploadStatusHub : Hub
     {
-        private const string FolderName = "Repositories";
-        private readonly GitService gitService;
-        private readonly IHostingEnvironment hostingEnvironment;
-        private readonly IDbVcsRepository repository;
-        private readonly IVcsFiles files;
-        
-        public UploadStatusHub(GitService gitService, IHostingEnvironment environment, IDbVcsRepository repository, IVcsFiles files)
+        private readonly IGitService gitService;
+        private readonly IDbVcsRepository vcsRepository;
+        private readonly IVcsFilesRepository filesRepository;
+
+        public UploadStatusHub(
+            IGitService gitService,
+            IDbVcsRepository vcsRepository,
+            IVcsFilesRepository filesRepository)
         {
             this.gitService = gitService;
-            hostingEnvironment = environment;
-            this.repository = repository;
-            this.files = files;
+            this.vcsRepository = vcsRepository;
+            this.filesRepository = filesRepository;
         }
 
         public async Task Upload(string repoUrl)
         {
-            var repo = repository.GetRepository(repoUrl);
-            if (repo == null)
+            var repo = vcsRepository.GetRepository(repoUrl);
+            if (repo != null)
             {
-                var fileName = repoUrl.ToGitFileName();
-                var uploads = Path.Combine(hostingEnvironment.WebRootPath, FolderName);
-                var repoPath = Path.Combine(uploads, fileName);
-                repoPath = repoPath.Replace("/", "\\");
+                await Clients.Caller.SendAsync("Error", "Current repository already exist.");
+                
+                return;
+            }
 
-                await Clients.Caller.SendAsync("Upload", repoUrl);
-                var result = await gitService.CloneAsync(repoUrl);
-                if (result)
-                {
-                    repo = new Repository { Name = fileName, Url = repoUrl, DateTime = DateTime.Now };
-                    repo.Files = files.GetFiles(repo).ToList();
-                    await repository.AddAndSaveChangesAsync(repo);
-                    await Clients.Caller.SendAsync("Uploaded");
-                }
-                else
-                {
-                    await Clients.Caller.SendAsync("Error");
-                }
+            if (!await gitService.IfExistsAsync(repoUrl.GetGitRepositoryName()))
+            {
+                await Clients.Caller.SendAsync("Error", "Not found Github repository with this url.");
+                
+                return;
+            }
+
+            var vcsRepositoryName = repoUrl.GetGitRepositoryName();
+
+            // Rename Upload to ShowUploadInProgress
+            await Clients.Caller.SendAsync("ShowUploadInProgress", repoUrl);
+
+            var result = await gitService.CloneAsync(repoUrl);
+            if (result)
+            {
+                repo = new Repository { Name = vcsRepositoryName, Url = repoUrl, DateTime = DateTime.Now };
+
+                // Refactor -> split file-system and db-related logic into separate classes
+                repo.Files = filesRepository.GetFiles(repo).ToList();
+
+                await vcsRepository.AddAndSaveChangesAsync(repo);
+
+                // Rename Upload to HideUploadInProgress
+                await Clients.Caller.SendAsync("HideUploadInProgress");
+            }
+            else
+            {
+                await Clients.Caller.SendAsync("Error", "Unexpected error!");
             }
         }
     }

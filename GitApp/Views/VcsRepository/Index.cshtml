@@ -8,7 +8,7 @@
 
 </div>
 <input type="text" id="inputUrl" class="form-control col-5 mb-3"/>
-<button type="submit" class="btn btn-dark" onclick="StartLoading()">Upload</button>
+<button type="submit" class="btn btn-dark mb-3" onclick="StartLoading()">Upload</button>
 
 <table class="table table-striped table-sm table-bordered">
     <thead>
@@ -32,14 +32,28 @@
             <td rowspan="3">
                 <a class="btn btn-dark" asp-action="Info" asp-route-id="@item.Id">Info</a>
             </td>
-            <td>@item.Files[0].Name</td>
+            @if (item.Files[0].Name.Length>50)
+            {
+                <td title="@item.Files[0].Name">@item.Files[0].Name.Remove(50)...</td>
+            }
+            else
+            {
+                <td>@item.Files[0].Name</td>
+            }
             <td>@item.Files[0].Count</td>
         </tr>
 
         @for (var a = 1; a < item.Files.Count && a < 3; a++)
         {
             <tr>
-                <td>@item.Files[a].Name</td>
+                @if (item.Files[a].Name.Length>50)
+                            {
+                                <td title="@item.Files[a].Name">@item.Files[a].Name.Remove(50)...</td>
+                            }
+                            else
+                            {
+                                <td>@item.Files[a].Name</td>
+                            }
                 <td>@item.Files[a].Count</td>
             </tr>
         }
@@ -60,20 +74,20 @@
     let loading_container = document.getElementById("loading-container");
     
     
-    hubConnection.on("Upload", function (data) {
+    hubConnection.on("ShowUploadInProgress", function (data) {
         loading_container.innerHTML="<div class=\"d-flex align-items-center\">\n"+
                                      "    <strong>" + data + "</strong>\n"+
                                      "    <div class=\"spinner-border ml-auto\" role=\"status\" aria-hidden=\"true\"></div>\n"+
                                      "  </div>";
     });
         
-    hubConnection.on("Uploaded", function (data) {
+    hubConnection.on("HideUploadInProgress", function (data) {
             loading_container.innerHTML="";
             document.location.reload(true)
         });
     
     hubConnection.on("Error", function (data) {
-                loading_container.innerHTML="<p>Error!</p>";
+                loading_container.innerHTML="<p>"+data+"</p>";
             });
     
     function StartLoading(){

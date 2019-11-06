@@ -5,15 +5,14 @@ using System.Threading.Tasks;
 using GitApp.Models.Db;
 using GitApp.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace GitApp.Repositories
 {
     public class DbVcsRepository : IDbVcsRepository
     {
-        private readonly ApplicationContext db;
-
         private const int AllFilesToShow = -1;
+        
+        private readonly ApplicationContext db;
 
         public DbVcsRepository(ApplicationContext context)
         {
@@ -108,6 +107,16 @@ namespace GitApp.Repositories
             }
         }
 
+        /// <inheritdoc/>
+        public async Task UpdateRepositoryAsync(Repository repository, IEnumerable<File> files)
+        {
+            repository.DateTime = DateTime.Now;
+            repository.Files.Clear();
+            repository.Files.AddRange(files);
+            db.Update(repository);
+            await db.SaveChangesAsync();
+        }
+
         private IReadOnlyList<FileViewModel> GetFiles(Repository repo, int count)
         {
             var files = repo.Files
@@ -124,18 +133,6 @@ namespace GitApp.Repositories
             }
 
             return files.ToList();
-        }
-
-        /// <inheritdoc/>
-        public async Task UpdateRepositoryAsync(Repository repository, IEnumerable<File> files)
-        {
-            repository.DateTime = DateTime.Now;
-            repository.Files.Clear();
-            //db.RemoveRange(db.Files.Where(f => f.RepositoryId == repository.Id).ToList());
-            //db.Files.AddRange(files);
-            repository.Files.AddRange(files);
-            db.Update(repository);
-            await db.SaveChangesAsync();
         }
     }
 }

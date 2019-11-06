@@ -18,30 +18,25 @@ namespace GitApp
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-            var login = Configuration.GetValue<string>("GitHub:Login");
-            var password = Configuration.GetValue<string>("GitHub:Password");
-            
-            services.AddCors(options => options.AddPolicy("CorsPolicy",
+            services.AddCors(options => options.AddPolicy(
+                "CorsPolicy",
                 builder =>
                 {
                     builder.AllowAnyMethod().AllowAnyHeader()
                         .WithOrigins("http://localhost:55830")
                         .AllowCredentials();
                 }));
+
+            RegisterDependencies(services);
             services.AddSignalR();
-            services.AddTransient<GitService, GitService>();
-            services.AddTransient<IDbVcsRepository, DbVcsRepository>();
-            services.AddTransient<IVcsFiles, VcsFiles>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,26 +50,37 @@ namespace GitApp
             {
                 app.UseExceptionHandler("/Home/Error");
 
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                // The default HSTS value is 30 days.
+                // You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
-            app.UseCors("CorsPolicy");
-            app.UseSignalR(routes => { routes.MapHub<UploadStatusHub>("/UploadStatus"); });
-
+            app.UseRouting();
+            
+            ConfigureSignalR(app);
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
-            app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private void RegisterDependencies(IServiceCollection services)
+        {
+            services.AddTransient<IGitService, GitService>();
+            services.AddTransient<IVcsFilesRepository, VcsFilesRepository>();
+            services.AddTransient<IDbVcsRepository, DbVcsRepository>();
+        }
+
+        private void ConfigureSignalR(IApplicationBuilder app)
+        {
+            app.UseCors("CorsPolicy");
+            app.UseEndpoints(routes => { routes.MapHub<UploadStatusHub>("/UploadStatus"); });
         }
     }
 }

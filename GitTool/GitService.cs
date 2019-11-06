@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+
+using GitTool.Services;
 using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
@@ -12,31 +14,35 @@ namespace GitTool
 {
     public class GitService : IGitService
     {
-        private const string FolderName = "Repositories";
+        private const string FolderName = @"wwwroot\Repositories";
         private readonly string login;
         private readonly string password;
-        private readonly IHostingEnvironment hostingEnvironment;
-        private readonly IConfiguration Configuration;
+        private readonly IWebHostEnvironment hostingEnvironment;
 
-        public GitService(IHostingEnvironment environment, IConfiguration configuration)
+        public GitService(IWebHostEnvironment hostingEnvironment, IConfiguration cfg)
         {
-            this.login = login;
-            this.password = password;
-            this.hostingEnvironment = environment;
-            login = configuration.("GitHub:Login");
-            password = configuration.GetValue<string>("GitHub:Password");
+            this.login = cfg["GitHub:Login"];
+            this.password = cfg["GitHub:Password"];
+            this.hostingEnvironment = hostingEnvironment;
+        }
+
+        public async Task<bool> IfExistsAsync(string repoPath)
+        {
+            var client = new HttpClient();
+            var responseString = await client.GetStringAsync("https://github.com/" + repoPath);
+            return responseString.Contains($"<title>GitHub - {repoPath}:");
         }
 
         /// <inheritdoc/>
         public async Task<bool> CloneAsync(string url)
         {
-            var path = GetRepositoryPath(url);
+            var path = GetRepositoryPath(url.GetGitRepositoryName());
             try
             {
                 await Task.Run(() => CloneDoWork(url, path));
                 return true;
             }
-            catch
+            catch (Exception e)
             {
                 return false;
             }
@@ -48,7 +54,7 @@ namespace GitTool
             // Credential information to fetch
             var options = new PullOptions
             {
-                FetchOptions = new FetchOptions { CredentialsProvider = new CredentialsHandler(GetCredentials) },
+                FetchOptions = new FetchOptions { CredentialsProvider = GetCredentials },
             };
 
             var signature = new Signature(
@@ -57,9 +63,6 @@ namespace GitTool
             // Pull
             Commands.Pull(repo, signature, options);
         }
-
-        // looks good to move it to separate class with a couple of small clear functions
-        // add logger
 
         /// <inheritdoc/>
         public Dictionary<string, int> GetFiles(string path)
@@ -75,7 +78,8 @@ namespace GitTool
                 {
                     foreach (var parent in commit.Parents)
                     {
-                        files.AddRange(repo.Diff.Compare<TreeChanges>(parent.Tree, commit.Tree).Select(change => change.Path));
+                        files.AddRange(repo.Diff.Compare<TreeChanges>(parent.Tree, commit.Tree)
+                            .Select(change => change.Path));
                     }
 
                     if (files.Count == 0)
@@ -101,7 +105,10 @@ namespace GitTool
         }
 
         // url, usernameFromUrl, types
-        private UsernamePasswordCredentials GetCredentials(string url, string usernameFromUrl, SupportedCredentialTypes types)
+        private UsernamePasswordCredentials GetCredentials(
+            string url,
+            string usernameFromUrl,
+            SupportedCredentialTypes types)
         {
             return new UsernamePasswordCredentials
             {
@@ -116,12 +123,19 @@ namespace GitTool
             {
                 CredentialsProvider = GetCredentials,
             };
-            Repository.Clone(url, path, co);
+            try
+            {
+                Repository.Clone(url, path, co);
+            }
+            catch (Exception e)
+            {
+                
+            }
         }
-        
+
         private string GetRepositoryPath(string fileName)
         {
-            var uploads = Path.Combine(hostingEnvironment.WebRootPath, FolderName);
+            var uploads = Path.Combine(hostingEnvironment.ContentRootPath, FolderName);
             var repoPath = Path.Combine(uploads, fileName);
             return repoPath.Replace("/", "\\");
         }

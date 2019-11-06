@@ -3,7 +3,7 @@ using GitApp.Models.Db;
 
 namespace GitApp.Repositories
 {
-    public interface IVcsFiles
+    public interface IVcsFilesRepository
     {
         /// <summary>
         /// Get Version Control System file models IEnumerable collection from Git repository.

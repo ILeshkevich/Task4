@@ -25,5 +25,7 @@ namespace GitTool
         /// <param name="path">Path to local git repository.</param>
         /// <returns>Specific <see cref="Dictionary{String,Int32}"/> if found.</returns>
         Dictionary<string, int> GetFiles(string path);
+
+        Task<bool> IfExistsAsync(string repoPath);
     }
 }

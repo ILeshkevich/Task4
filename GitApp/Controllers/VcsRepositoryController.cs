@@ -2,39 +2,36 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GitApp.Hubs;
-using GitApp.Models.Db;
 using GitApp.Repositories;
-using GitApp.Services;
 using GitTool;
+using GitTool.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-
-// todo: SignalR support async task tracking...
 namespace GitApp.Controllers
 {
     public class VcsRepositoryController : Controller
     {
-        private const string FolderName = "Repositories";
-        
-        private readonly ILogger<VcsRepositoryController> logger;
-        private readonly IHostingEnvironment hostingEnvironment;
-        private readonly GitService _gitService;
-        private readonly IDbVcsRepository repository;
-        private readonly IHubContext<UploadStatusHub> hubContext;
+        private const string FolderName = @"wwwroot\Repositories";
 
-        public VcsRepositoryController(ILogger<VcsRepositoryController> logger,
-            IHostingEnvironment environment, GitService gitService, IHubContext<UploadStatusHub> hubContext,
+        private readonly ILogger<VcsRepositoryController> logger;
+        private readonly IWebHostEnvironment hostingEnvironment;
+        private readonly IGitService gitService;
+        private readonly IDbVcsRepository repository;
+
+        public VcsRepositoryController(
+            ILogger<VcsRepositoryController> logger,
+            IWebHostEnvironment environment,
+            IGitService gitService,
+            IHubContext<UploadStatusHub> hubContext,
             IDbVcsRepository repository)
         {
             this.logger = logger;
             hostingEnvironment = environment;
-            this._gitService = gitService;
+            this.gitService = gitService;
             this.repository = repository;
-            this.hubContext = hubContext;
         }
 
         public IActionResult Index()
@@ -58,7 +55,7 @@ namespace GitApp.Controllers
         {
             return View();
         }
-        
+
         public async Task<IActionResult> Update(int id)
         {
             var repo = repository.GetRepository(id);
@@ -67,10 +64,10 @@ namespace GitApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var fileName = repo.Url.ToGitFileName();
+            var fileName = repo.Url.GetGitRepositoryName();
             var repoPath = GetRepositoryPath(fileName);
 
-            var files = _gitService.GetFiles(repoPath).Select(f => new Models.Db.File
+            var files = gitService.GetFiles(repoPath).Select(f => new Models.Db.File
             {
                 Name = f.Key,
                 ChangesCount = f.Value,
