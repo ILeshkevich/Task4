@@ -1,6 +1,7 @@
 using GitApp.Hubs;
 using GitApp.Models.Db;
 using GitApp.Repositories;
+using GitApp.Services;
 using GitTool;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -74,7 +75,8 @@ namespace GitApp
         {
             services.AddTransient<IGitService, GitService>();
             services.AddTransient<IVcsFilesRepository, VcsFilesRepository>();
-            services.AddTransient<IDbVcsRepository, DbVcsRepository>();
+            services.AddTransient<IDbVcsRepositoryRepository, DbVcsRepositoryRepository>();
+            services.AddTransient<IRepositoryWorker, RepositoryWorker>();
         }
 
         private void ConfigureSignalR(IApplicationBuilder app)

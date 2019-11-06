@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace GitApp.Repositories
 {
-    public interface IDbVcsRepository
+    public interface IDbVcsRepositoryRepository
     {
         /// <summary>
         /// Get Version System Control Repository view model.
@@ -70,8 +70,7 @@ namespace GitApp.Repositories
         /// Update Version System Control Repository and it's files in database.
         /// </summary>
         /// <param name="repository">Repository to update.</param>
-        /// <param name="files">New files collection.</param>
         /// <returns>Task.</returns>
-        Task UpdateRepositoryAsync(Repository repository, IEnumerable<File> files);
+        Task UpdateRepositoryAsync(Repository repository);
     }
 }

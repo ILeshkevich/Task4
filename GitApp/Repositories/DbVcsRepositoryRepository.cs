@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GitApp.Repositories
 {
-    public class DbVcsRepository : IDbVcsRepository
+    public class DbVcsRepositoryRepository : IDbVcsRepositoryRepository
     {
         private const int AllFilesToShow = -1;
         
         private readonly ApplicationContext db;
 
-        public DbVcsRepository(ApplicationContext context)
+        public DbVcsRepositoryRepository(ApplicationContext context)
         {
             db = context;
         }
@@ -108,11 +108,9 @@ namespace GitApp.Repositories
         }
 
         /// <inheritdoc/>
-        public async Task UpdateRepositoryAsync(Repository repository, IEnumerable<File> files)
+        public async Task UpdateRepositoryAsync(Repository repository)
         {
             repository.DateTime = DateTime.Now;
-            repository.Files.Clear();
-            repository.Files.AddRange(files);
             db.Update(repository);
             await db.SaveChangesAsync();
         }

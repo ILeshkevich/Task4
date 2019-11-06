@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GitApp.Models.Db;
 using GitApp.Repositories;
-
+using GitApp.Services;
 using GitTool;
 using GitTool.Services;
 using Microsoft.AspNetCore.SignalR;
@@ -13,52 +13,40 @@ namespace GitApp.Hubs
     public class UploadStatusHub : Hub
     {
         private readonly IGitService gitService;
-        private readonly IDbVcsRepository vcsRepository;
-        private readonly IVcsFilesRepository filesRepository;
+        private readonly IDbVcsRepositoryRepository vcsRepositoryRepository;
+        private readonly IRepositoryWorker repositoryWorker;
 
         public UploadStatusHub(
             IGitService gitService,
-            IDbVcsRepository vcsRepository,
-            IVcsFilesRepository filesRepository)
+            IDbVcsRepositoryRepository vcsRepositoryRepository,
+            IRepositoryWorker repositoryWorker)
         {
             this.gitService = gitService;
-            this.vcsRepository = vcsRepository;
-            this.filesRepository = filesRepository;
+            this.vcsRepositoryRepository = vcsRepositoryRepository;
+            this.repositoryWorker = repositoryWorker;
         }
 
         public async Task Upload(string repoUrl)
         {
-            var repo = vcsRepository.GetRepository(repoUrl);
+            var repo = vcsRepositoryRepository.GetRepository(repoUrl);
             if (repo != null)
             {
                 await Clients.Caller.SendAsync("Error", "Current repository already exist.");
-                
                 return;
             }
 
             if (!await gitService.IfExistsAsync(repoUrl.GetGitRepositoryName()))
             {
                 await Clients.Caller.SendAsync("Error", "Not found Github repository with this url.");
-                
                 return;
             }
 
-            var vcsRepositoryName = repoUrl.GetGitRepositoryName();
-
-            // Rename Upload to ShowUploadInProgress
             await Clients.Caller.SendAsync("ShowUploadInProgress", repoUrl);
-
+            
             var result = await gitService.CloneAsync(repoUrl);
             if (result)
             {
-                repo = new Repository { Name = vcsRepositoryName, Url = repoUrl, DateTime = DateTime.Now };
-
-                // Refactor -> split file-system and db-related logic into separate classes
-                repo.Files = filesRepository.GetFiles(repo).ToList();
-
-                await vcsRepository.AddAndSaveChangesAsync(repo);
-
-                // Rename Upload to HideUploadInProgress
+                await repositoryWorker.CreateRepositoryAsync(repoUrl);
                 await Clients.Caller.SendAsync("HideUploadInProgress");
             }
             else

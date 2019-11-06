@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-
 using GitTool.Services;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Hosting;
@@ -60,14 +59,14 @@ namespace GitTool
             var signature = new Signature(
                 new Identity(login, login), DateTimeOffset.Now);
 
-            // Pull
             Commands.Pull(repo, signature, options);
         }
 
         /// <inheritdoc/>
-        public Dictionary<string, int> GetFiles(string path)
+        public Dictionary<string, int> GetFiles(string repositoryName)
         {
             var files = new List<string>();
+            var path = GetRepositoryPath(repositoryName);
             try
             {
                 using var repo = new Repository(path);
@@ -123,14 +122,8 @@ namespace GitTool
             {
                 CredentialsProvider = GetCredentials,
             };
-            try
-            {
-                Repository.Clone(url, path, co);
-            }
-            catch (Exception e)
-            {
-                
-            }
+            
+            Repository.Clone(url, path, co);
         }
 
         private string GetRepositoryPath(string fileName)

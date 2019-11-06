@@ -6,10 +6,11 @@ namespace GitApp.Repositories
     public interface IVcsFilesRepository
     {
         /// <summary>
-        /// Get Version Control System file models IEnumerable collection from Git repository.
+        /// Convert dictionary (key - file name, value - changes count)
+        /// Version Control System file models IEnumerable collection.
         /// </summary>
-        /// <param name="repository">repository.</param>
+        /// <param name="files">Files dictionary.</param>
         /// <returns>Specific <see cref="IEnumerable{File}"/> if found.</returns>
-        IEnumerable<File> GetFiles(Repository repository);
+        IEnumerable<File> ToFileCollection(Dictionary<string, int> files);
     }
 }

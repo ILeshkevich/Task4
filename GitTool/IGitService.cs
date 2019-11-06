@@ -22,9 +22,9 @@ namespace GitTool
         /// <summary>
         /// Get files files with changes count from local git repository.
         /// </summary>
-        /// <param name="path">Path to local git repository.</param>
+        /// <param name="repositoryName">Name of local git repository.</param>
         /// <returns>Specific <see cref="Dictionary{String,Int32}"/> if found.</returns>
-        Dictionary<string, int> GetFiles(string path);
+        Dictionary<string, int> GetFiles(string repositoryName);
 
         Task<bool> IfExistsAsync(string repoPath);
     }

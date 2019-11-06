@@ -35,8 +35,4 @@
     <ProjectReference Include="..\GitTool\GitTool.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services" />
-  </ItemGroup>
-
 </Project>
