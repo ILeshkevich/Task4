@@ -106,7 +106,14 @@ namespace GitApp.Repositories
                 return null;
             }
         }
-
+        
+        /// <inheritdoc/>
+        public async Task DeleteFilesAsync(Repository repository)
+        {
+            db.RemoveRange(db.Files.Where(r => r.Repository == repository));
+            await db.SaveChangesAsync();
+        }
+        
         /// <inheritdoc/>
         public async Task UpdateRepositoryAsync(Repository repository)
         {

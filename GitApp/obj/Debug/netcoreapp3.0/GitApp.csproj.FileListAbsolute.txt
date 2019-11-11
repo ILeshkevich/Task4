@@ -155,3 +155,8 @@ D:\Task3\GitApp\GitApp\bin\Debug\netcoreapp3.0\System.IO.Pipelines.dll
 D:\Task3\GitApp\GitApp\bin\Debug\netcoreapp3.0\System.Runtime.CompilerServices.Unsafe.dll
 D:\Task3\GitApp\GitApp\bin\Debug\netcoreapp3.0\System.Text.Encodings.Web.dll
 D:\Task3\GitApp\GitApp\bin\Debug\netcoreapp3.0\System.Text.Json.dll
+D:\Task3\GitApp\GitApp\bin\Debug\netcoreapp3.0\en\GitApp.resources.dll
+D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\GitApp.Resources.Views.VcsRepository.Index.en.resources
+D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\GitApp.csproj.GenerateResource.cache
+D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\en\GitApp.resources.cs
+D:\Task3\GitApp\GitApp\obj\Debug\netcoreapp3.0\en\GitApp.resources.dll

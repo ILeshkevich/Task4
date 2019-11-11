@@ -67,10 +67,17 @@ namespace GitApp.Repositories
         VcsRepositoryViewModel FirstOrDefault(string url);
   
         /// <summary>
-        /// Update Version System Control Repository and it's files in database.
+        /// Asynchronous update Version System Control Repository and it's files in database.
         /// </summary>
         /// <param name="repository">Repository to update.</param>
         /// <returns>Task.</returns>
         Task UpdateRepositoryAsync(Repository repository);
+
+        /// <summary>
+        /// Asynchronous delete Version Control System repository files from database. 
+        /// </summary>
+        /// <param name="repository">Repository to delete it's files.</param>
+        /// <returns>Task.</returns>
+        Task DeleteFilesAsync(Repository repository);
     }
 }

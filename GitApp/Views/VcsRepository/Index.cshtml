@@ -7,96 +7,96 @@
 <div id="loading-container">
 
 </div>
-<input type="text" id="inputUrl" class="form-control col-5 mb-3"/>
+<input type="text" id="inputUrl" class="form-control col-5 mb-3" />
 <button type="submit" class="btn btn-dark mb-3" onclick="StartLoading()">Upload</button>
 
 <table class="table table-striped table-sm table-bordered">
     <thead>
-    <tr>
-        <th>#</th>
-        <th>Url</th>
-        <th>Info</th>
-        <th>Most changin files</th>
-        <th>File changes count</th>
-    </tr>
+        <tr>
+            <th>#</th>
+            <th>Url</th>
+            <th>Info</th>
+            <th>Most changin files</th>
+            <th>File changes count</th>
+        </tr>
     </thead>
     <tbody>
-    @{ var i = 1; }
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td rowspan="3">@(i++)</td>
-            <td rowspan="3">
-                <a href="@item.Url">@item.Url</a>
-            </td>
-            <td rowspan="3">
-                <a class="btn btn-dark" asp-action="Info" asp-route-id="@item.Id">Info</a>
-            </td>
-            @if (item.Files[0].Name.Length>50)
-            {
-                <td title="@item.Files[0].Name">@item.Files[0].Name.Remove(50)...</td>
-            }
-            else
-            {
-                <td>@item.Files[0].Name</td>
-            }
-            <td>@item.Files[0].Count</td>
-        </tr>
-
-        @for (var a = 1; a < item.Files.Count && a < 3; a++)
+        @{ var i = 1; }
+        @foreach (var item in Model)
         {
             <tr>
-                @if (item.Files[a].Name.Length>50)
-                            {
-                                <td title="@item.Files[a].Name">@item.Files[a].Name.Remove(50)...</td>
-                            }
-                            else
-                            {
-                                <td>@item.Files[a].Name</td>
-                            }
-                <td>@item.Files[a].Count</td>
+                <td rowspan="3">@(i++)</td>
+                <td rowspan="3">
+                    <a href="@item.Url">@item.Url</a>
+                </td>
+                <td rowspan="3">
+                    <a class="btn btn-dark" asp-action="Info" asp-route-id="@item.Id">Info</a>
+                </td>
+                @if (item.Files[0].Name.Length > 50)
+                {
+                    <td title="@item.Files[0].Name">@item.Files[0].Name.Remove(50)...</td>
+                }
+                else
+                {
+                    <td>@item.Files[0].Name</td>
+                }
+                <td>@item.Files[0].Count</td>
             </tr>
+
+            @for (var a = 1; a < item.Files.Count && a < 3; a++)
+            {
+                <tr>
+                    @if (item.Files[a].Name.Length > 50)
+                    {
+                        <td title="@item.Files[a].Name">@item.Files[a].Name.Remove(50)...</td>
+                    }
+                    else
+                    {
+                        <td>@item.Files[a].Name</td>
+                    }
+                    <td>@item.Files[a].Count</td>
+                </tr>
+            }
         }
-    }
     </tbody>
 
 </table>
 <script src="~/js/signalr.js"></script>
 <script>
     const hubConnection = new signalR.HubConnectionBuilder()
-            .withUrl('/UploadStatus', {
-                                  skipNegotiation: true,
-                                  transport: signalR.HttpTransportType.WebSockets
-                                })
-            .configureLogging(signalR.LogLevel.Trace)
-            .build();
-    
+        .withUrl('/UploadStatus', {
+            skipNegotiation: true,
+            transport: signalR.HttpTransportType.WebSockets
+        })
+        .configureLogging(signalR.LogLevel.Trace)
+        .build();
+
     let loading_container = document.getElementById("loading-container");
-    
-    
+
+
     hubConnection.on("ShowUploadInProgress", function (data) {
-        loading_container.innerHTML="<div class=\"d-flex align-items-center\">\n"+
-                                     "    <strong>" + data + "</strong>\n"+
-                                     "    <div class=\"spinner-border ml-auto\" role=\"status\" aria-hidden=\"true\"></div>\n"+
-                                     "  </div>";
+        loading_container.innerHTML = "<div class=\"d-flex align-items-center\">\n" +
+            "    <strong>" + data + "</strong>\n" +
+            "    <div class=\"spinner-border ml-auto\" role=\"status\" aria-hidden=\"true\"></div>\n" +
+            "  </div>";
     });
-        
+
     hubConnection.on("HideUploadInProgress", function (data) {
-            loading_container.innerHTML="";
-            document.location.reload(true)
-        });
-    
+        loading_container.innerHTML = "";
+        document.location.reload(true)
+    });
+
     hubConnection.on("Error", function (data) {
-                loading_container.innerHTML="<p>"+data+"</p>";
-            });
-    
-    function StartLoading(){
-            let repoUrl = document.getElementById('inputUrl').value;
-            
-            hubConnection.invoke("Upload", repoUrl);
-            
-        } 
-    
+        loading_container.innerHTML = "<p>" + data + "</p>";
+    });
+
+    function StartLoading() {
+        let repoUrl = document.getElementById('inputUrl').value;
+
+        hubConnection.invoke("Upload", repoUrl);
+
+    }
+
     hubConnection.start().then(function () {
         console.log("connected");
     });

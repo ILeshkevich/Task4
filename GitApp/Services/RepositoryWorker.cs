@@ -38,6 +38,7 @@ namespace GitApp.Services
         public async Task<Repository> UpdateRepositoryAsync(Repository repository)
         {
             var repositoryName = repository.Url.GetGitRepositoryName();
+            await vcsRepositoryRepository.DeleteFilesAsync(repository);
             repository.Files = filesRepository.ToFileCollection(gitService.GetFiles(repositoryName)).ToList();
             await vcsRepositoryRepository.UpdateRepositoryAsync(repository);
             
