@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		..\..\SolutionItems\default.ruleset = ..\..\SolutionItems\default.ruleset
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitApp.Tests", "GitApp.Tests\GitApp.Tests.csproj", "{785280D3-BFAA-45DB-81CC-39F360A1823E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitTool.Tests", "GitTool.Tests\GitTool.Tests.csproj", "{5246BF26-42CA-45F3-8B17-92EE8ECE2857}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{F8CED071-B619-4B42-9CD0-8334E180F3DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8CED071-B619-4B42-9CD0-8334E180F3DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8CED071-B619-4B42-9CD0-8334E180F3DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{785280D3-BFAA-45DB-81CC-39F360A1823E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{785280D3-BFAA-45DB-81CC-39F360A1823E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{785280D3-BFAA-45DB-81CC-39F360A1823E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{785280D3-BFAA-45DB-81CC-39F360A1823E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5246BF26-42CA-45F3-8B17-92EE8ECE2857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5246BF26-42CA-45F3-8B17-92EE8ECE2857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5246BF26-42CA-45F3-8B17-92EE8ECE2857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5246BF26-42CA-45F3-8B17-92EE8ECE2857}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

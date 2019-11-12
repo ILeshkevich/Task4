@@ -25,24 +25,17 @@ namespace GitApp.Controllers
 
         public IActionResult Index()
         {
-            return View(repositoryRepository.List());
+            return View(nameof(Index), repositoryRepository.List());
         }
 
-        public IActionResult Info(int id)
-        {
+        public IActionResult Info(int id){
             var repo = repositoryRepository.FirstOrDefault(id);
             if (repo != null)
             {
-                return View(repo);
+                return View(nameof(Info), repo);
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        [HttpGet]
-        public IActionResult Upload()
-        {
-            return View();
         }
 
         public async Task<IActionResult> Update(int id)

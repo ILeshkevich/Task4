@@ -1,0 +1,40 @@
+﻿<script src="~/js/signalr.js"></script>
+<script>
+    const hubConnection = new signalR.HubConnectionBuilder()
+        .withUrl('/UploadStatus', {
+            skipNegotiation: true,
+            transport: signalR.HttpTransportType.WebSockets
+        })
+        .configureLogging(signalR.LogLevel.Trace)
+        .build();
+
+    let loading_container = document.getElementById("loading-container");
+
+
+    hubConnection.on("ShowUploadInProgress", function (data) {
+        loading_container.innerHTML = "<div class=\"d-flex align-items-center\">\n" +
+            "    <strong>" + data + "</strong>\n" +
+            "    <div class=\"spinner-border ml-auto\" role=\"status\" aria-hidden=\"true\"></div>\n" +
+            "  </div>";
+    });
+
+    hubConnection.on("HideUploadInProgress", function (data) {
+        loading_container.innerHTML = "";
+        document.location.reload(true)
+    });
+
+    hubConnection.on("Error", function (data) {
+        loading_container.innerHTML = "<p>" + data + "</p>";
+    });
+
+    function StartLoading() {
+        let repoUrl = document.getElementById('inputUrl').value;
+
+        hubConnection.invoke("Upload", repoUrl);
+
+    }
+
+    hubConnection.start().then(function () {
+        console.log("connected");
+    });
+</script>

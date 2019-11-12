@@ -1,3 +1,4 @@
+using System.Globalization;
 using GitApp.Hubs;
 using GitApp.Models.Db;
 using GitApp.Repositories;
@@ -5,6 +6,7 @@ using GitApp.Services;
 using GitTool;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +26,7 @@ namespace GitApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddControllersWithViews();
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -38,6 +41,8 @@ namespace GitApp
 
             RegisterDependencies(services);
             services.AddSignalR();
+            services.AddMvc()
+                .AddViewLocalization();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,6 +61,17 @@ namespace GitApp
                 app.UseHsts();
             }
 
+            var supportedCultures = new[]
+            {
+                new CultureInfo("en"),
+            };
+            app.UseRequestLocalization(new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture("en"),
+                SupportedCultures = supportedCultures,
+                SupportedUICultures = supportedCultures,
+            });
+            
             app.UseRouting();
             
             ConfigureSignalR(app);

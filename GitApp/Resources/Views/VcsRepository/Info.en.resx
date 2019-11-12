@@ -123,9 +123,6 @@
   <data name="Info" xml:space="preserve">
     <value>Info</value>
   </data>
-  <data name="MostChangingFiles" xml:space="preserve">
-    <value>Most changing files</value>
-  </data>
   <data name="Update" xml:space="preserve">
     <value>Update</value>
   </data>

@@ -16,7 +16,8 @@ namespace GitApp.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            logger.LogInformation("help me pls");
+            return View(nameof(Index));
         }
 
         public IActionResult Privacy()

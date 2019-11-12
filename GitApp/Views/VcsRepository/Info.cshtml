@@ -1,4 +1,6 @@
-﻿@model GitApp.Models.ViewModels.VcsRepositoryViewModel
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model GitApp.Models.ViewModels.VcsRepositoryViewModel
 @{
     ViewData["Title"] = "Info";
 }
@@ -10,15 +12,15 @@
         <h5 class="text-muted">Last update: @Model.LastUpdate</h5>
     </div>
     <div class="col-md-5">
-        <a class="btn btn-info" asp-action="Update" asp-controller="VcsRepository" asp-route-id="@Model.Id">Update</a>
+        <a class="btn btn-info" asp-action="Update" asp-controller="VcsRepository" asp-route-id="@Model.Id">@Localizer["Update"]</a>
     </div>
 </div>
 <table class="table table-striped table-sm table-bordered">
     <thead>
         <tr>
             <th>#</th>
-            <th>Name</th>
-            <th>Changes count</th>
+            <th>@Localizer["Name"]</th>
+            <th>@Localizer["FileChangesCount"]</th>
         </tr>
     </thead>
     <tbody>
