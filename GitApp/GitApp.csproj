@@ -14,6 +14,11 @@
     <Content Remove="wwwroot\Repositories\**" />
     <EmbeddedResource Remove="wwwroot\Repositories\**" />
     <None Remove="wwwroot\Repositories\**" />
+    <Content Update="nlog.config">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +30,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
+    <PackageReference Include="NLog" Version="4.6.8" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
@@ -35,5 +41,4 @@
   <ItemGroup>
     <ProjectReference Include="..\GitTool\GitTool.csproj" />
   </ItemGroup>
-
 </Project>

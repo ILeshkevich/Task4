@@ -14,7 +14,7 @@ namespace GitApp.Tests
         public HomeControllerTests()
         {   
             mockLogger = new Mock<ILogger<HomeController>>();
-            controller = new HomeController(null);
+            controller = new HomeController(mockLogger.Object);
         }
         
         [Fact]
