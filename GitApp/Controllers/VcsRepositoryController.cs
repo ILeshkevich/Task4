@@ -28,7 +28,8 @@ namespace GitApp.Controllers
             return View(nameof(Index), repositoryRepository.List());
         }
 
-        public IActionResult Info(int id){
+        public IActionResult Info(int id)
+        {
             var repo = repositoryRepository.FirstOrDefault(id);
             if (repo != null)
             {

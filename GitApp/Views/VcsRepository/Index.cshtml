@@ -1,16 +1,18 @@
 ﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using GitApp.Services
 @inject IViewLocalizer Localizer
 @model IReadOnlyList<GitApp.Models.ViewModels.VcsRepositoryViewModel>
 @{
     ViewData["Title"] = "Index";
 }
+@{ var rowspanValue = 5;}
 
 <h1>@Localizer["Name"]</h1>
 <div id="loading-container">
 
 </div>
 <input type="text" id="inputUrl" class="form-control col-5 mb-3" />
-<button type="submit" class="btn btn-dark mb-3" onclick="StartLoading()">@Localizer["Upload"]</button>
+<button type="submit" id="uploadButton" class="btn btn-dark mb-3">@Localizer["Upload"]</button>
 
 <table class="table table-striped table-sm table-bordered">
     <thead>
@@ -23,45 +25,40 @@
         </tr>
     </thead>
     <tbody>
-        @{ var i = 1; }
+        @{ var rowNumber = 1; }
         @foreach (var item in Model)
         {
             <tr>
-                <td rowspan="3">@(i++)</td>
-                <td rowspan="3">
+                <td rowspan="@rowspanValue">@(rowNumber++)</td>
+                <td rowspan="@rowspanValue">
                     <a href="@item.Url">@item.Url</a>
                 </td>
-                <td rowspan="3">
+                <td rowspan="@rowspanValue">
                     <a class="btn btn-dark" asp-action="Info" asp-route-id="@item.Id">Info</a>
                 </td>
-                @if (item.Files[0].Name.Length > 50)
-                {
-                    <td title="@item.Files[0].Name">@item.Files[0].Name.Remove(50)...</td>
-                }
-                else
-                {
-                    <td>@item.Files[0].Name</td>
-                }
+                @{ var fileName = item.Files[0].Name;}
+
+                @Html.ShortTd(fileName)
                 <td>@item.Files[0].Count</td>
             </tr>
 
-            @for (var a = 1; a < item.Files.Count && a < 3; a++)
+            @for (var a = 1;a < rowspanValue; a++)
             {
-                <tr>
-                    @if (item.Files[a].Name.Length > 50)
-                    {
-                        <td title="@item.Files[a].Name">@item.Files[a].Name.Remove(50)...</td>
-                    }
-                    else
-                    {
-                        <td>@item.Files[a].Name</td>
-                    }
-                    <td>@item.Files[a].Count</td>
-                </tr>
+                if (a < item.Files.Count)
+                {
+                    fileName = item.Files[a].Name;
+                    <tr>
+                        @Html.ShortTd(fileName)
+                        <td>@item.Files[a].Count</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr></tr>
+                }
             }
         }
     </tbody>
-
 </table>
 @{
     Html.RenderPartial("SignalRScripts.cshtml");

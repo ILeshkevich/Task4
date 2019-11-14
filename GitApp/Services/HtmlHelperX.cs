@@ -1,22 +1,21 @@
 ﻿using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace GitApp.Services
 {
-    public static class CustomHtmlHelper
+    public static class HtmlHelperX
     {
         private const int DefaultTextLength = 50;
         
-        public static IHtmlContent ShortTd(this HtmlHelper helper, string text, int textLength = DefaultTextLength)
+        public static HtmlString ShortTd(this IHtmlHelper helper, string text, int textLength = DefaultTextLength)
         {
             var result = $"<td>{text}</td>";
-            if (text.Length > 50)
+            if (text.Length > textLength)
             {
-                
-                result = $" <td title='{text}'>{text.Remove(textLength)}...</td>";
+                result = $"<td title='{text}'>{text.Remove(textLength)}...</td>";
             }
-
-            return new HtmlContentBuilder().Append(result);
+            
+            return new HtmlString(result);
         }
     }
 }

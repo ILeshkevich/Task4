@@ -27,12 +27,10 @@
         loading_container.innerHTML = "<p>" + data + "</p>";
     });
 
-    function StartLoading() {
+    document.getElementById("uploadButton").addEventListener("click", function () {
         let repoUrl = document.getElementById('inputUrl').value;
-
         hubConnection.invoke("Upload", repoUrl);
-
-    }
+    });
 
     hubConnection.start().then(function () {
         console.log("connected");

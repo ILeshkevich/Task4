@@ -2,12 +2,12 @@
 using GitApp.Models.ViewModels;
 using GitApp.Repositories;
 using GitApp.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using Microsoft.AspNetCore.Mvc;
 
-namespace GitApp.Tests
+namespace GitApp.Tests.Controllers
 {
     public class VcsRepositoryControllerTests
     {
