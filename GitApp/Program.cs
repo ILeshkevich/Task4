@@ -10,7 +10,8 @@ namespace GitApp
     {
         public static void Main(string[] args)
         {
-            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config")
+                .GetCurrentClassLogger();
             try
             {
                 logger.Debug("init main");
@@ -24,7 +25,8 @@ namespace GitApp
             }
             finally
             {
-                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
+                // Ensure to flush and stop internal timers/threads before application-exit
+                // (Avoid segmentation fault on Linux)
                 NLog.LogManager.Shutdown();
             }
         }

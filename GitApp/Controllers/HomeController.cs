@@ -16,7 +16,6 @@ namespace GitApp.Controllers
 
         public IActionResult Index()
         {
-            logger.LogError("help me pls");
             return View(nameof(Index));
         }
 

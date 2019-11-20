@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GitTool.Services;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

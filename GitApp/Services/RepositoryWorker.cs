@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using GitApp.Models.Db;
 using GitApp.Repositories;
 using GitTool;
-using GitTool.Services;
 
 namespace GitApp.Services
 {

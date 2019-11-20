@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace GitTool.Services
+namespace GitTool
 {
     public static class StringExtension
     {

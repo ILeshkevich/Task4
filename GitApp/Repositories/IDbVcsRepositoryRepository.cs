@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using GitApp.Models.Db;
 using GitApp.Models.ViewModels;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace GitApp.Repositories
 {

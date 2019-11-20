@@ -1,11 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using GitApp.Models.Db;
+﻿using System.Threading.Tasks;
 using GitApp.Repositories;
 using GitApp.Services;
 using GitTool;
-using GitTool.Services;
 using Microsoft.AspNetCore.SignalR;
 
 namespace GitApp.Hubs

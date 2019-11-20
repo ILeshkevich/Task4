@@ -1,5 +1,4 @@
 using System;
-using GitTool.Services;
 using Xunit;
 
 namespace GitTool.Tests
